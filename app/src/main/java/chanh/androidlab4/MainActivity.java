@@ -32,6 +32,7 @@ public class MainActivity extends AppCompatActivity {
     Button mBtUpdate;
     Button mBtReset;
     Button mBtSelect;
+    Button mBtDescSort;
 
     ListView mList;
     ArrayAdapter<String> baseAdapter;
@@ -55,7 +56,13 @@ public class MainActivity extends AppCompatActivity {
         mBtUpdate = (Button) findViewById(R.id.bt_update);
         mBtReset = (Button) findViewById(R.id.bt_reset);
         mBtSelect = (Button) findViewById(R.id.bt_select);
+        mBtDescSort = (Button) findViewById(R.id.bt_ascsort);
         ListView mList = (ListView) findViewById(R.id.list_view);
+
+        // Create listview
+        nameList = new ArrayList<String>();
+        baseAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, nameList);
+        mList.setAdapter(baseAdapter);
 
         mBtInsert.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,11 +84,6 @@ public class MainActivity extends AppCompatActivity {
                 baseAdapter.notifyDataSetChanged();
             }
         });
-
-        // Create listview
-        nameList = new ArrayList<String>();
-        baseAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_expandable_list_item_1, nameList);
-        mList.setAdapter(baseAdapter);
 
         mBtDelete.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 removeTable();
                 createTable();
+                Toast.makeText(getApplicationContext(), "초기화 됐습니다", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -129,6 +132,15 @@ public class MainActivity extends AppCompatActivity {
                     String id = mEtID.getText().toString();
                     selectData(Integer.parseInt(id));
                 }
+            }
+        });
+
+        mBtDescSort.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                nameList.clear();
+                descSort();
+                baseAdapter.notifyDataSetChanged();
             }
         });
     }
@@ -203,6 +215,21 @@ public class MainActivity extends AppCompatActivity {
             String name = results.getString(1);
 //            Toast.makeText(this, "index= " + id + " name=" + name, Toast.LENGTH_SHORT).show();
             Log.d("lab_sqlite", "index= " + id + " name=" + name);
+
+            nameList.add(name);
+            results.moveToNext();
+        }
+        results.close();
+    }
+
+    // 정렬 Data 읽기
+    public void descSort() {
+        String sql = "select * from " + tableName + " order by id desc;";
+        Cursor results = db.rawQuery(sql, null);
+
+        results.moveToFirst();
+        while (!results.isAfterLast()) {
+            String name = results.getString(1);
 
             nameList.add(name);
             results.moveToNext();
